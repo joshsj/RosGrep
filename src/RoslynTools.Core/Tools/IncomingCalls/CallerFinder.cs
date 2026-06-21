@@ -5,27 +5,8 @@ namespace RoslynTools.Core.Tools.IncomingCalls;
 
 internal class CallerFinder
 {
-    // todo is this more presentational?
-    private static readonly SymbolDisplayFormat TypeAndMemberDisplayFormat = new(
-        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-        memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeContainingType,
-        parameterOptions: SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeName,
-        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                              SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
-    
-    private static readonly SymbolDisplayFormat MemberDisplayFormat = new(
-        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
-        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-        memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeContainingType,
-        parameterOptions: SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeName,
-        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                              SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
-
     private readonly Solution _solution;
     private readonly int _maxDepth;
-
-    public List<MemberNode> FoundMembers { get; } = [];
 
     internal CallerFinder(Solution solution, int maxDepth)
     {
@@ -33,69 +14,68 @@ internal class CallerFinder
         _maxDepth = maxDepth;
     }
 
-    internal async Task FindCallsAsync(ISymbol memberSymbol)
-    {
-        var callers = await FindCallsAsync(memberSymbol, 0, new HashSet<ISymbol>(SymbolEqualityComparer.Default));
-        var memberNode = new MemberNode(memberSymbol.ToDisplayString(MemberDisplayFormat), callers);
-
-        FoundMembers.Add(memberNode);
-    }
+    internal IAsyncEnumerable<CallerNode> FindCallsAsync(ISymbol memberSymbol)
+        => FindCallsAsync(memberSymbol, 0, new HashSet<ISymbol>(SymbolEqualityComparer.Default));
 
     // Build the caller nodes for `symbol`, recursing. Merges call sites across the
     // symbol and every interface member it implements (DI dispatch).
-    private async Task<IEnumerable<CallerNode>> FindCallsAsync(ISymbol memberSymbol, int currentDepth, HashSet<ISymbol> visited)
+    private async IAsyncEnumerable<CallerNode> FindCallsAsync(ISymbol memberSymbol, int currentDepth,
+        HashSet<ISymbol> visited)
     {
+        if (currentDepth >= _maxDepth)
+        {
+            yield break;
+        }
+
         // Search callers of the symbol AND of any interface member it implements.
-        var callSitesByCallerSymbol = new Dictionary<ISymbol, HashSet<CallSite>>(SymbolEqualityComparer.Default);
+        var callSitesByCallerSymbol = new Dictionary<ISymbol, HashSet<SymbolLocation>>(SymbolEqualityComparer.Default);
 
         foreach (var target in GetSearchTargets(memberSymbol))
         {
             foreach (var symbolCallerInfo in await SymbolFinder.FindCallersAsync(target, _solution))
             {
                 // todo make configurable so you can filter out calls to yourself
-                // if (!info.IsDirect)
+                // if (!symbolCallerInfo.IsDirect)
                 // {
                 //     continue;
                 // }
 
-                if (!callSitesByCallerSymbol.TryGetValue(symbolCallerInfo.CallingSymbol, out var callSites))
+                var callingSymbol = symbolCallerInfo.CallingSymbol;
+
+                if (!callSitesByCallerSymbol.TryGetValue(callingSymbol, out var callSites))
                 {
-                    callSitesByCallerSymbol[symbolCallerInfo.CallingSymbol] = callSites = [];
+                    callSitesByCallerSymbol[callingSymbol] = callSites = [];
                 }
 
                 // Exclude callers not in source code
-                foreach (var callerLocation in symbolCallerInfo.Locations.Where(x => x.IsInSource))
+                foreach (var callingLocation in symbolCallerInfo.Locations.Where(x => x.IsInSource))
                 {
-                    callSites.Add(CallSite.From(callerLocation));
+                    callSites.Add(SymbolLocation.From(callingLocation));
                 }
             }
         }
 
-        var nodes = new List<CallerNode>();
-        foreach (var (caller, value) in callSitesByCallerSymbol)
+        foreach (var (callingSymbol, callSites) in callSitesByCallerSymbol)
         {
-            var node = new CallerNode
+            visited.Add(callingSymbol);
+
+            var node = new CallerNode(callingSymbol.ToDisplayString(Formatting.TypeAndMemberDisplayFormat));
+
+            node.Definitions.AddRange(
+                callingSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()
+            );
+
+            node.CallSites.AddRange(callSites.Order());
+
+            await foreach (var callerNode in FindCallsAsync(callingSymbol, currentDepth++, visited))
             {
-                Signature = caller.ToDisplayString(TypeAndMemberDisplayFormat),
-            };
-
-            node.CallSites.AddRange(value.OrderBy(x => x.File).ThenBy(x => x.Line));
-
-            var nextDepth = ++currentDepth;
-            
-            if (nextDepth < _maxDepth)
-            {
-                visited.Add(caller);
-
-                var callers = await FindCallsAsync(caller, nextDepth, visited);
-
-                node.Callers.AddRange(callers);
+                node.Callers.AddRange(callerNode);
             }
 
-            nodes.Add(node);
-        }
+            node.Callers.Sort();
 
-        return nodes.OrderBy(x => x.Signature);
+            yield return node;
+        }
     }
 
     // The symbol itself plus every interface member it implements (implicit or explicit).

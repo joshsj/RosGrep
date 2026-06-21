@@ -1,17 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace RoslynTools.Core.Tools.IncomingCalls;
 
-namespace RoslynTools.Core.Tools.IncomingCalls;
-
-public class IncomingCallsReport
+public class IncomingCallsReport(string typeName)
 {
-    public required string TypeName { get; init;  }
+    public string TypeName { get; init; } = typeName;
 
     public List<MemberNode> Members { get; } = [];
-    
-    [SetsRequiredMembers]
-    public IncomingCallsReport(string typeName, IEnumerable<MemberNode> members)
-    {
-        TypeName = typeName;
-        Members.AddRange(members);
-    }
 }

@@ -34,21 +34,33 @@ public class IncomingCallsTool(
             return IncomingCallsResult.Fail($"Failed to find type '{options.TypeName}'");
         }
 
-        var members = FindMembers(options, typeNameSymbol);
+        var memberSymbols = FindMemberSymbols(options, typeNameSymbol);
 
-        if (members is null)
+        if (memberSymbols is null)
         {
             return IncomingCallsResult.Fail($"No members found on '{options.TypeName}'");
         }
 
         var callerFinder = new CallerFinder(solution, options.Depth);
+        var report = new IncomingCallsReport(typeNameSymbol.ToDisplayString());
 
-        foreach (var member in members)
+        foreach (var memberSymbol in memberSymbols)
         {
-            await callerFinder.FindCallsAsync(member);
+            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Formatting.MemberDisplayFormat));
+        
+            memberNode.Definitions.AddRange(
+                memberSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()
+            );
+            
+            await foreach (var callerNode in callerFinder.FindCallsAsync(memberSymbol))
+            {
+                memberNode.Callers.Add(callerNode);
+            }
+            
+            report.Members.Add(memberNode);
         }
 
-        var report = new IncomingCallsReport(typeNameSymbol.ToDisplayString(), callerFinder.FoundMembers.OrderBy(x => x.Signature));
+        report.Members.Sort();
 
         return IncomingCallsResult.Success(report);
     }
@@ -107,19 +119,13 @@ public class IncomingCallsTool(
         return null;
     }
 
-    private List<ISymbol>? FindMembers(IncomingCallsToolOptions options, INamedTypeSymbol symbol)
+    private List<ISymbol>? FindMemberSymbols(IncomingCallsToolOptions options, INamedTypeSymbol symbol)
     {
         // todo make configurable
-        var members = symbol.GetMembers().Where(m => m.Kind is SymbolKind.Method or SymbolKind.Property);
-
-        var hasWhitelist = options.TypeMemberNames is not null;
-
-        if (hasWhitelist)
-        {
-            members = members.Where(x => options.TypeMemberNames!.Contains(x.Name));
-        }
-
-        var allocated = members.OrderBy(m => m.Name).ToList();
+        var allocated = symbol.GetMembers()
+            .Where(m => m.Kind is SymbolKind.Method or SymbolKind.Property)
+            .OrderBy(m => m.Name)
+            .ToList();
 
         if (allocated.Count is 0)
         {

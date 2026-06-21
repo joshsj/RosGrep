@@ -7,6 +7,4 @@ public record IncomingCallsToolOptions
     public required string TypeName { get; init; }
     
     public required int Depth { get; init; }
-
-    public ISet<string>? TypeMemberNames { get; init; }
 }

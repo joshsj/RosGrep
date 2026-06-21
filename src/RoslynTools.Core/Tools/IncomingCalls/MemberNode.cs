@@ -1,17 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace RoslynTools.Core.Tools.IncomingCalls;
 
-namespace RoslynTools.Core.Tools.IncomingCalls;
-
-public class MemberNode
+public class MemberNode(string signature) : CallableNode(signature), IComparable<MemberNode>
 {
-    public required string Signature { get; init; }
-
-    public List<CallerNode> Callers { get; } = [];
-
-    [SetsRequiredMembers]
-    public MemberNode(string signature, IEnumerable<CallerNode> callers)
-    {
-        Signature = signature;
-        Callers.AddRange(callers);
-    }
+    public int CompareTo(MemberNode? other) => base.CompareTo(other);
 }

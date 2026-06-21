@@ -1,10 +1,8 @@
 ﻿namespace RoslynTools.Core.Tools.IncomingCalls;
 
-public class CallerNode
+public class CallerNode(string signature) : CallableNode(signature), IComparable<CallerNode>
 {
-    public required string Signature { get; init; }
+    public List<SymbolLocation> CallSites { get; } = [];
 
-    public List<CallSite> CallSites { get; } = [];
-
-    public List<CallerNode> Callers { get; } = [];
+    public int CompareTo(CallerNode? other) => base.CompareTo(other);
 }

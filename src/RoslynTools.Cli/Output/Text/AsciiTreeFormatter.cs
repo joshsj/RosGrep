@@ -9,11 +9,19 @@ public static class AsciiTreeFormatter
     private const string Vertical = " │ ";
     private const string Space = "   ";
 
-    public static string Format(AsciiTreeNode root)
+    public static string Format(params IEnumerable<AsciiTreeNode> roots)
     {
         var sb = new StringBuilder();
 
-        PrintNode(sb, root, "");
+        foreach (var (i, root) in roots.Index())
+        {
+            if (i > 0)
+            {
+                sb.AppendLine();
+            }
+
+            PrintNode(sb, root, "");
+        }
 
         return sb.ToString();
     }
@@ -21,7 +29,7 @@ public static class AsciiTreeFormatter
     private static void PrintNode(StringBuilder sb, AsciiTreeNode node, string indent)
     {
         sb.Append(' ');
-        sb.AppendLine(node.Name);
+        sb.AppendLine(node.Text);
 
         var childCount = node.Children.Count();
 
@@ -43,4 +51,4 @@ public static class AsciiTreeFormatter
     }
 }
 
-public readonly record struct AsciiTreeNode(string Name, IEnumerable<AsciiTreeNode> Children);
+public readonly record struct AsciiTreeNode(string Text, IEnumerable<AsciiTreeNode> Children);
