@@ -76,6 +76,8 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
                        "Use to avoid naming conflicts between different constructs with the same name.")]
         public string? SymbolNamespace { get; set; }
 
+        // todo member include, exclude, types
+        
         [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
         public int Depth { get; set; }
 
