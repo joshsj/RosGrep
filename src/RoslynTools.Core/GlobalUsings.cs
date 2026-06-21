@@ -1,1 +1,0 @@
-﻿global using static RoslynTools.Core.Definitions.Constants;
