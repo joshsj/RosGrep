@@ -26,6 +26,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             { IsSuccess: true } => new LogResult(
                 options.Format switch
                 {
+                    // todo slap dash, do we want to make this re-usable as well?
                     Options.OutputFormat.Tree => ToAsciiTree(result.Report),
                     Options.OutputFormat.Json => JsonSerializer.Serialize(result.Report,
                         Constants.Formatting.PrettyJsonOptions),
