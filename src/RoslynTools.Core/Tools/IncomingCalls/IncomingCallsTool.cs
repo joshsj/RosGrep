@@ -1,9 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
-using RoslynTools.MSBuild;
+using RoslynTools.Core.MSBuild;
 
-namespace RoslynTools.Tools.IncomingCalls;
+namespace RoslynTools.Core.Tools.IncomingCalls;
 
 public class IncomingCallsTool(
     ILogger<IncomingCallsTool> logger,

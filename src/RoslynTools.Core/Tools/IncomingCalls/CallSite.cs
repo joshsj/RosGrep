@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace RoslynTools.Tools.IncomingCalls;
+namespace RoslynTools.Core.Tools.IncomingCalls;
 
 public readonly record struct CallSite(string File, int Line, int Character)
 {

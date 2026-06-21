@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace RoslynTools.Tools.IncomingCalls;
+namespace RoslynTools.Core.Tools.IncomingCalls;
 
 public class IncomingCallsReport
 {

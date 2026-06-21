@@ -1,0 +1,160 @@
+{
+  "typeName": "Lib.IRepository<T>",
+  "members": [
+    {
+      "signature": "IRepository<T>.Add(T entity)",
+      "callers": [
+        {
+          "signature": "Service2.Method()",
+          "foundAtMaxDepth": false,
+          "callSites": [
+            {
+              "file": "C:\\Dev\\example-project\\src\\App\\Service2.cs",
+              "line": 9,
+              "character": 8
+            }
+          ],
+          "callers": [
+            {
+              "signature": "Program.Main()",
+              "foundAtMaxDepth": false,
+              "callSites": [
+                {
+                  "file": "C:\\Dev\\example-project\\src\\App\\Program.cs",
+                  "line": 14,
+                  "character": 12
+                }
+              ],
+              "callers": []
+            }
+          ]
+        },
+        {
+          "signature": "Service1.Method()",
+          "foundAtMaxDepth": false,
+          "callSites": [
+            {
+              "file": "C:\\Dev\\example-project\\src\\App\\Service1.cs",
+              "line": 7,
+              "character": 8
+            }
+          ],
+          "callers": [
+            {
+              "signature": "Program.Main()",
+              "foundAtMaxDepth": false,
+              "callSites": [
+                {
+                  "file": "C:\\Dev\\example-project\\src\\App\\Program.cs",
+                  "line": 13,
+                  "character": 12
+                }
+              ],
+              "callers": []
+            },
+            {
+              "signature": "Service2.Method()",
+              "foundAtMaxDepth": false,
+              "callSites": [
+                {
+                  "file": "C:\\Dev\\example-project\\src\\App\\Service2.cs",
+                  "line": 7,
+                  "character": 12
+                }
+              ],
+              "callers": [
+                {
+                  "signature": "Program.Main()",
+                  "foundAtMaxDepth": false,
+                  "callSites": [
+                    {
+                      "file": "C:\\Dev\\example-project\\src\\App\\Program.cs",
+                      "line": 14,
+                      "character": 12
+                    }
+                  ],
+                  "callers": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "signature": "IRepository<T>.GetAll()",
+      "callers": []
+    },
+    {
+      "signature": "IRepository<T>.GetById(int id)",
+      "callers": []
+    },
+    {
+      "signature": "IRepository<T>.Save()",
+      "callers": [
+        {
+          "signature": "Service1.Method()",
+          "foundAtMaxDepth": false,
+          "callSites": [
+            {
+              "file": "C:\\Dev\\example-project\\src\\App\\Service1.cs",
+              "line": 8,
+              "character": 8
+            }
+          ],
+          "callers": [
+            {
+              "signature": "Program.Main()",
+              "foundAtMaxDepth": false,
+              "callSites": [
+                {
+                  "file": "C:\\Dev\\example-project\\src\\App\\Program.cs",
+                  "line": 13,
+                  "character": 12
+                }
+              ],
+              "callers": []
+            },
+            {
+              "signature": "Service2.Method()",
+              "foundAtMaxDepth": false,
+              "callSites": [
+                {
+                  "file": "C:\\Dev\\example-project\\src\\App\\Service2.cs",
+                  "line": 7,
+                  "character": 12
+                }
+              ],
+              "callers": [
+                {
+                  "signature": "Program.Main()",
+                  "foundAtMaxDepth": false,
+                  "callSites": [
+                    {
+                      "file": "C:\\Dev\\example-project\\src\\App\\Program.cs",
+                      "line": 14,
+                      "character": 12
+                    }
+                  ],
+                  "callers": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "signature": "Program.Main()",
+          "foundAtMaxDepth": false,
+          "callSites": [
+            {
+              "file": "C:\\Dev\\example-project\\src\\App\\Program.cs",
+              "line": 17,
+              "character": 11
+            }
+          ],
+          "callers": []
+        }
+      ]
+    }
+  ]
+}

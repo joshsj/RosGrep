@@ -3,7 +3,7 @@ using System.Text.Json;
 using RoslynTools.Cli.Commands.Results;
 using RoslynTools.Cli.Definitions;
 using RoslynTools.Cli.Output.Text;
-using RoslynTools.Tools.IncomingCalls;
+using RoslynTools.Core.Tools.IncomingCalls;
 
 namespace RoslynTools.Cli.Commands.IncomingCalls;
 

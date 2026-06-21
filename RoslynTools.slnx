@@ -1,4 +1,4 @@
 <Solution>
   <Project Path="src/RoslynTools.Cli/RoslynTools.Cli.csproj" />
-  <Project Path="src/RoslynTools/RoslynTools.csproj" />
+  <Project Path="src/RoslynTools.Core/RoslynTools.Core.csproj" />
 </Solution>

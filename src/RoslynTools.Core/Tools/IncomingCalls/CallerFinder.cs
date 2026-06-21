@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 
-namespace RoslynTools.Tools.IncomingCalls;
+namespace RoslynTools.Core.Tools.IncomingCalls;
 
 internal class CallerFinder
 {

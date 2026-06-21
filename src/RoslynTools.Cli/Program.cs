@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RoslynTools;
+using RoslynTools.Core;
 using RoslynTools.Cli.Commands;
 using RoslynTools.Cli.Commands.Results;
 
@@ -23,7 +23,7 @@ if (parsed.Tag == ParserResultType.NotParsed)
 
 var services = new ServiceCollection();
 
-services.RegisterRoslynTools();
+services.RegisterRoslynCore();
 
 foreach (var (commandType, _) in commandAndOptionTypes)
 {

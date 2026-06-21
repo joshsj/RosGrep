@@ -1,4 +1,4 @@
-﻿namespace RoslynTools.Tools.IncomingCalls;
+﻿namespace RoslynTools.Core.Tools.IncomingCalls;
 
 public record IncomingCallsToolOptions
 {

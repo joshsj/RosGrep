@@ -1,14 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RoslynTools.MSBuild;
-using RoslynTools.Tools.IncomingCalls;
+using RoslynTools.Core.MSBuild;
+using RoslynTools.Core.Tools.IncomingCalls;
 
-namespace RoslynTools;
+namespace RoslynTools.Core;
 
 public static class Configuration
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection RegisterRoslynTools()
+        public IServiceCollection RegisterRoslynCore()
         {
             services.AddSingleton<MSBuildLocatorInitializer>();
 
