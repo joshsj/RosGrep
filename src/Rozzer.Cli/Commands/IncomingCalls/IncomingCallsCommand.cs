@@ -14,8 +14,9 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
     {
         IncomingCallsToolOptions incomingCallsToolOptions = new()
         {
-            SolutionName = options.Target,
-            TypeName = options.TypeName,
+            WorkspaceName = options.Name,
+            SymbolName = options.SymbolName,
+            SymbolType = options.SymbolType,
             Depth = options.Depth,
         };
 
@@ -58,13 +59,16 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
     [Verb("incoming-calls", HelpText = "Find calls recursively to a method")]
     internal sealed class Options
     {
-        [Value(0, MetaName = "target", Required = true,
-            HelpText = "Path to the solution (.sln[x]) or project (.csproj) to load.")]
-        public string Target { get; set; } = "";
+        [Value(0, MetaName = "workspace", Required = true, HelpText = "Path to the solution (.sln[x]) or project (.csproj) to load.")]
+        public string Name { get; set; } = "";
 
-        [Value(1, MetaName = "type-name", Required = true,
-            HelpText = "Name of the interface whose members' callers to walk.")]
-        public string TypeName { get; set; } = "";
+        [Value(1, MetaName = "symbol-name", Required = true, HelpText = "Name of the symbol whose members' callers to walk.")]
+        public string SymbolName { get; set; } = "";
+
+        [Option("symbol-type",
+            HelpText = "Type of the symbol whose members' callers to walk. " + 
+                       "Use to avoid naming conflicts between different constructs with the same name.")]
+        public IncomingCallsToolSymbolType SymbolType { get; set; }
 
         [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
         public int Depth { get; set; }
