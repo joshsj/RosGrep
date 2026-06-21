@@ -27,14 +27,14 @@ public class IncomingCallsTool(
 
         var solution = await OpenSolution(options, workspace);
 
-        var interfaceSymbol = await FindInterfaceSymbol(options, solution);
+        var typeNameSymbol = await FindTypeNameSymbol(options, solution);
 
-        if (interfaceSymbol is null)
+        if (typeNameSymbol is null)
         {
             return IncomingCallsResult.Fail($"Failed to find type '{options.TypeName}'");
         }
 
-        var members = FindMembers(options, interfaceSymbol);
+        var members = FindMembers(options, typeNameSymbol);
 
         if (members is null)
         {
@@ -48,7 +48,7 @@ public class IncomingCallsTool(
             await callerFinder.FindCallsAsync(member);
         }
 
-        var report = new IncomingCallsReport(interfaceSymbol.ToDisplayString(), callerFinder.FoundMembers.OrderBy(x => x.Signature));
+        var report = new IncomingCallsReport(typeNameSymbol.ToDisplayString(), callerFinder.FoundMembers.OrderBy(x => x.Signature));
 
         return IncomingCallsResult.Success(report);
     }
@@ -82,7 +82,7 @@ public class IncomingCallsTool(
         return solution;
     }
 
-    private async Task<INamedTypeSymbol?> FindInterfaceSymbol(IncomingCallsToolOptions options, Solution solution)
+    private async Task<INamedTypeSymbol?> FindTypeNameSymbol(IncomingCallsToolOptions options, Solution solution)
     {
         logger.LogDebug("Looking for type '{TypeName}'", options.TypeName);
 
