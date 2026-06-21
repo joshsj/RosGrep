@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RoslynTools.Core;
 using RoslynTools.Cli.Commands;
-using RoslynTools.Cli.Commands.Results;
 
 using var parser = new Parser(settings =>
 {
@@ -17,7 +16,6 @@ var parsed = parser.ParseArguments(args, commandAndOptionTypes.Select(x => x.Opt
 
 if (parsed.Tag == ParserResultType.NotParsed)
 {
-    // todo better
     return 1;
 }
 
@@ -25,45 +23,25 @@ var services = new ServiceCollection();
 
 services.RegisterRoslynCore();
 
-foreach (var (commandType, _) in commandAndOptionTypes)
+services.AddTransient<CommandExecutor>();
+
+foreach (var (type, _) in commandAndOptionTypes)
 {
-    services.AddTransient(commandType);
+    services.AddTransient(type);
 }
 
 services.AddLogging(x => x.ClearProviders().AddConsole());
 
 var serviceProvider = services.BuildServiceProvider();
 
-var isError = false;
-
-await parsed.WithParsedAsync(async options =>
-{
-    var commandType = options.GetType().DeclaringType!;
+var options = parsed.Value;
+var commandType = options.GetType().DeclaringType!;
     
-    await using var serviceScope = serviceProvider.CreateAsyncScope();
+await using var serviceScope = serviceProvider.CreateAsyncScope();
 
-    var command = (ICommand)serviceScope.ServiceProvider.GetRequiredService(commandType);
+var commandExecutor = serviceScope.ServiceProvider.GetRequiredService<CommandExecutor>();
 
-    var result = await command.ExecuteAsync(options);
-    
-    switch (result) {
-        case LogResult logResult:
-        {
-            // todo or use logger?
-            Console.WriteLine(logResult.Message);
-            break;
-        }
-
-        case ErrorResult errorResult:
-        {
-            serviceScope.ServiceProvider.GetRequiredService<ILogger<Program>>().LogError("{Message}", errorResult.Message);
-            isError = true;
-            break;
-        }
-    }
-});
-
-return isError ? 1 : 0;
+return await commandExecutor.ExecuteAsync(commandType, options);
 
 IEnumerable<(Type CommandType, Type OptionType)> FindCommandAndOptionTypes() =>
     Assembly.GetExecutingAssembly()
