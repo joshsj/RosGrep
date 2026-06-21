@@ -73,6 +73,7 @@ public class IncomingCallsTool(
     {
         logger.LogDebug("Opening solution {SolutionName} ...", options.SolutionName);
 
+        // todo allow just folder name to be specified? would be nice if we can reuse the logic of dotnet cli to find the "single" target
         var solution = options.SolutionName.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             ? (await workspace.OpenProjectAsync(options.SolutionName)).Solution
             : (await workspace.OpenSolutionAsync(options.SolutionName)).Workspace.CurrentSolution;
