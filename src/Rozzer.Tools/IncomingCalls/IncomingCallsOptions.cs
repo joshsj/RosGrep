@@ -7,6 +7,8 @@ public record IncomingCallsToolOptions
     public required string SymbolName { get; init; }
 
     public required IncomingCallsToolSymbolType SymbolType { get; init; }
+
+    public required string? SymbolNamespace { get; init; }
     
     public required int Depth { get; init; }
 }

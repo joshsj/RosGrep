@@ -17,6 +17,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             WorkspaceName = options.Name,
             SymbolName = options.SymbolName,
             SymbolType = options.SymbolType,
+            SymbolNamespace = options.SymbolNamespace,
             Depth = options.Depth,
         };
 
@@ -69,6 +70,11 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             HelpText = "Type of the symbol whose members' callers to walk. " + 
                        "Use to avoid naming conflicts between different constructs with the same name.")]
         public IncomingCallsToolSymbolType SymbolType { get; set; }
+        
+        [Option("symbol-namespace",
+            HelpText = "Namespace of the symbol whose members' callers to walk. " + 
+                       "Use to avoid naming conflicts between different constructs with the same name.")]
+        public string? SymbolNamespace { get; set; }
 
         [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
         public int Depth { get; set; }

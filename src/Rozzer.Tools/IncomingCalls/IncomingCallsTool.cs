@@ -125,6 +125,13 @@ public class IncomingCallsTool(
                 candidates = candidates.Where(x => x.TypeKind == filteredTypeKind);
             }
 
+            if (!string.IsNullOrWhiteSpace(options.SymbolNamespace))
+            {
+                // todo not sure if .Name is right
+                // todo do I need to filter by NamespaceKind
+                candidates = candidates.Where(x => x.ContainingNamespace.Name == options.SymbolNamespace);
+            }
+
             var matches = candidates.ToList();
 
             switch (matches.Count)
