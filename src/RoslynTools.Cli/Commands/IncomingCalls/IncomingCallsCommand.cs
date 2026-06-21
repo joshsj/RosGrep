@@ -45,7 +45,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         static string Text(CallableNode c)
         {
             var def = c.Definition is { } d
-                ? $" @ {d.File}"
+                ? $" @ {d.File}:{d.Line}"
                 : "";
 
             return c.Signature + def;
