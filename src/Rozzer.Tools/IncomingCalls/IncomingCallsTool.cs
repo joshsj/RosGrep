@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
-using Rozzer.Tools.Definitions;
 using Rozzer.Tools.Models;
 using Rozzer.Tools.MSBuild;
 
@@ -13,15 +12,6 @@ public class IncomingCallsTool(
     MSBuildLocatorInitializer msBuildLocatorInitializer
 )
 {
-    // todo make configurable (or just get rid)
-    private static readonly string[] IgnoredMsBuildErrors =
-    [
-        "may not be fully compatible with your project",
-        "detected package downgrade",
-        "detected package version outside of dependency constraint",
-        "severity vulnerability",
-    ];
-
     public async Task<IncomingCallsResult> InvokeAsync(IncomingCallsToolOptions options)
     {
         msBuildLocatorInitializer.EnsureInitialized();
@@ -49,7 +39,7 @@ public class IncomingCallsTool(
 
         foreach (var memberSymbol in memberSymbols)
         {
-            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Constants.Formatting.MemberDisplayFormat));
+            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Formatting.MemberDisplayFormat));
         
             memberNode.Definitions.AddRange(
                 memberSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()
@@ -74,8 +64,7 @@ public class IncomingCallsTool(
 
         workspace.RegisterWorkspaceFailedHandler(args =>
         {
-            if (args.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure &&
-                IgnoredMsBuildErrors.All(x => !args.Diagnostic.Message.Contains(x, StringComparison.OrdinalIgnoreCase)))
+            if (args.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
             {
                 logger.LogError("{DiagnosticMessage}", args.Diagnostic.Message);
             }
