@@ -2,6 +2,7 @@
 using System.Text.Json;
 using RoslynTools.Cli.Commands.Results;
 using RoslynTools.Cli.Definitions;
+using RoslynTools.Cli.Output.Text;
 using RoslynTools.Tools.IncomingCalls;
 
 namespace RoslynTools.Cli.Commands.IncomingCalls;
@@ -24,7 +25,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             { IsSuccess: true } => new LogResult(
                 options.Format switch
                 {
-                    Options.OutputFormat.Tree => "to do",
+                    Options.OutputFormat.Tree => ToAsciiTree(result.Report),
                     Options.OutputFormat.Json => JsonSerializer.Serialize(result.Report, Constants.Formatting.PrettyJsonOptions),
                     _ => throw new UnreachableException()
                 }
@@ -32,6 +33,18 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
                     
             { IsSuccess: false } => new ErrorResult(result.Message),
         };
+    }
+
+    private static string ToAsciiTree(IncomingCallsReport report)
+    {
+        var root = new AsciiTreeNode(
+            report.TypeName,
+            report.Members.Select(m => new AsciiTreeNode(m.Signature, m.Callers.Select(MapCallerNode)))
+        );
+
+        return AsciiTreeFormatter.Format(root);
+
+        static AsciiTreeNode MapCallerNode(CallerNode c) => new(c.Signature, c.Callers.Select(MapCallerNode));
     }
 
     [Verb("incoming-calls", HelpText = "Find calls recursively to a method")]

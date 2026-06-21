@@ -11,7 +11,7 @@ public class IncomingCallsTool(
 )
 {
     // todo make configurable (or just get rid)
-    private static readonly string[] Ignored =
+    private static readonly string[] IgnoredMsBuildErrors =
     [
         "may not be fully compatible with your project",
         "detected package downgrade",
@@ -45,12 +45,10 @@ public class IncomingCallsTool(
 
         foreach (var member in members)
         {
-            // todo need to put this back somewhere
-            // .OrderBy(p => p.Key.ContainingType?.Name ?? "").ThenBy(p => p.Key.Name)
             await callerFinder.FindCallsAsync(member);
         }
 
-        var report = new IncomingCallsReport(interfaceSymbol.ToDisplayString(), callerFinder.Members);
+        var report = new IncomingCallsReport(interfaceSymbol.ToDisplayString(), callerFinder.FoundMembers.OrderBy(x => x.Signature));
 
         return IncomingCallsResult.Success(report);
     }
@@ -62,7 +60,7 @@ public class IncomingCallsTool(
         workspace.RegisterWorkspaceFailedHandler(args =>
         {
             if (args.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure &&
-                Ignored.All(x => !args.Diagnostic.Message.Contains(x, StringComparison.OrdinalIgnoreCase)))
+                IgnoredMsBuildErrors.All(x => !args.Diagnostic.Message.Contains(x, StringComparison.OrdinalIgnoreCase)))
             {
                 logger.LogError("{DiagnosticMessage}", args.Diagnostic.Message);
             }
@@ -94,9 +92,7 @@ public class IncomingCallsTool(
 
             var candidate = compilation?.GetSymbolsWithName(options.TypeName, SymbolFilter.Type)
                 .OfType<INamedTypeSymbol>()
-                // todo doesn't have to be an interface
-                // todo first or default is pants here, don't assume 1
-                .FirstOrDefault(t => t.TypeKind == TypeKind.Interface);
+                .FirstOrDefault(t => t.TypeKind is TypeKind.Interface or TypeKind.Class or TypeKind.Struct);
 
             if (candidate is not null)
             {

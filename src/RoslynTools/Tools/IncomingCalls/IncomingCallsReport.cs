@@ -1,11 +1,17 @@
-﻿namespace RoslynTools.Tools.IncomingCalls;
+﻿using System.Diagnostics.CodeAnalysis;
 
-public record IncomingCallsReport(string TypeName)
+namespace RoslynTools.Tools.IncomingCalls;
+
+public class IncomingCallsReport
 {
+    public required string TypeName { get; init;  }
+
     public List<MemberNode> Members { get; } = [];
     
-    public IncomingCallsReport(string typeName, IEnumerable<MemberNode> members) : this(typeName)
+    [SetsRequiredMembers]
+    public IncomingCallsReport(string typeName, IEnumerable<MemberNode> members)
     {
+        TypeName = typeName;
         Members.AddRange(members);
     }
 }
