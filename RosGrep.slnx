@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Misc/">
     <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
     <File Path="README.md" />
   </Folder>
   <Project Path="src/RosGrep.Cli/RosGrep.Cli.csproj" />
