@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Misc/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/RosGrep.Cli/RosGrep.Cli.csproj" />
+  <Project Path="src/RozGrep.Tools/RozGrep.Tools.csproj" />
+</Solution>

@@ -1,1 +1,0 @@
-﻿global using static Rozzer.Tools.Definitions.Constants;

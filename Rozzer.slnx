@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/Misc/">
-    <File Path=".gitignore" />
-    <File Path="README.md" />
-  </Folder>
-  <Project Path="src/Rozzer.Cli/Rozzer.Cli.csproj" />
-  <Project Path="src/Rozzer.Tools/Rozzer.Tools.csproj" />
-</Solution>
