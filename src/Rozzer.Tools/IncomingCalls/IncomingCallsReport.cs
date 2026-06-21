@@ -1,4 +1,6 @@
-﻿namespace Rozzer.Core.Tools.IncomingCalls;
+﻿using Rozzer.Tools.Models;
+
+namespace Rozzer.Tools.IncomingCalls;
 
 public class IncomingCallsReport(string typeName)
 {

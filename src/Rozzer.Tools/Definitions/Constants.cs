@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Rozzer.Core.Definitions;
+namespace Rozzer.Tools.Definitions;
 
 internal static class Constants
 {

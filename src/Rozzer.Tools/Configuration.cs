@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Rozzer.Core.MSBuild;
-using Rozzer.Core.Tools.IncomingCalls;
+using Rozzer.Tools.IncomingCalls;
+using Rozzer.Tools.MSBuild;
 
-namespace Rozzer.Core;
+namespace Rozzer.Tools;
 
 public static class Configuration
 {

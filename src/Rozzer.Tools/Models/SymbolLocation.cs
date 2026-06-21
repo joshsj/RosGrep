@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Rozzer.Core.Tools.IncomingCalls;
+namespace Rozzer.Tools.Models;
 
 public readonly record struct SymbolLocation(string File, int Line, int Character) : IComparable<SymbolLocation>
 {

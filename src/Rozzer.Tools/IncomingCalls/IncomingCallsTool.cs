@@ -1,10 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
-using Rozzer.Core.Definitions;
-using Rozzer.Core.MSBuild;
+using Rozzer.Tools.Definitions;
+using Rozzer.Tools.Models;
+using Rozzer.Tools.MSBuild;
 
-namespace Rozzer.Core.Tools.IncomingCalls;
+namespace Rozzer.Tools.IncomingCalls;
 
 public class IncomingCallsTool(
     ILogger<IncomingCallsTool> logger,
@@ -47,7 +48,7 @@ public class IncomingCallsTool(
 
         foreach (var memberSymbol in memberSymbols)
         {
-            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Formatting.MemberDisplayFormat));
+            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Constants.Formatting.MemberDisplayFormat));
         
             memberNode.Definitions.AddRange(
                 memberSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()

@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using Rozzer.Core.Definitions;
+using Rozzer.Tools.Definitions;
 
-namespace Rozzer.Core.Tools.IncomingCalls;
+namespace Rozzer.Tools.Models;
 
 internal class CallerFinder
 {
@@ -60,7 +60,7 @@ internal class CallerFinder
         {
             visited.Add(callingSymbol);
 
-            var node = new CallerNode(callingSymbol.ToDisplayString(Formatting.TypeAndMemberDisplayFormat));
+            var node = new CallerNode(callingSymbol.ToDisplayString(Constants.Formatting.TypeAndMemberDisplayFormat));
 
             node.Definitions.AddRange(
                 callingSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()

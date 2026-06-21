@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Rozzer.Core\Rozzer.Core.csproj" />
+      <ProjectReference Include="..\Rozzer.Tools\Rozzer.Tools.csproj" />
     </ItemGroup>
 
     <ItemGroup>

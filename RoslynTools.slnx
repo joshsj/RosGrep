@@ -4,5 +4,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="src/Rozzer.Cli/Rozzer.Cli.csproj" />
-  <Project Path="src/Rozzer.Core/Rozzer.Core.csproj" />
+  <Project Path="src/Rozzer.Tools/Rozzer.Tools.csproj" />
 </Solution>

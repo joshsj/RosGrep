@@ -1,4 +1,4 @@
-﻿namespace Rozzer.Core.Tools.IncomingCalls;
+﻿namespace Rozzer.Tools.Models;
 
 // todo better name?
 public class CallableNode(string signature) : IComparable<CallableNode>

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Rozzer.Core.Tools.IncomingCalls;
+namespace Rozzer.Tools.IncomingCalls;
 
 public class IncomingCallsResult
 {
