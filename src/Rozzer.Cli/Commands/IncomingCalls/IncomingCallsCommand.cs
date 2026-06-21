@@ -26,10 +26,9 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             { IsSuccess: true } => new LogResult(
                 options.Format switch
                 {
-                    // todo slap dash, do we want to make this re-usable as well?
+                    // todo slap dash, do we want to make this re-usable as well
                     Options.OutputFormat.Tree => ToAsciiTree(result.Report),
-                    Options.OutputFormat.Json => JsonSerializer.Serialize(result.Report,
-                        Constants.Formatting.PrettyJsonOptions),
+                    Options.OutputFormat.Json => JsonSerializer.Serialize(result.Report, Constants.Formatting.PrettyJsonOptions),
                     _ => throw new UnreachableException()
                 }
             ),
@@ -47,7 +46,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         static string Text(CallableNode c)
         {
             var def = c.Definition is { } d
-                ? $" @ {d.File}:{d.Line}"
+                ? $" ({d.File}:{d.Line})"
                 : "";
 
             return c.Signature + def;
@@ -70,8 +69,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
         public int Depth { get; set; }
 
-        [Option("format", Default = default(OutputFormat),
-            HelpText = $"Output format, {nameof(OutputFormat.Json)} or {nameof(OutputFormat.Tree)}")]
+        [Option("format", HelpText = $"Output format, {nameof(OutputFormat.Json)} or {nameof(OutputFormat.Tree)}")]
         public OutputFormat Format { get; set; }
 
         public enum OutputFormat
