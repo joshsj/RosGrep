@@ -12,7 +12,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
 {
     public async Task<ICommandResult> ExecuteAsync(Options options)
     {
-        IncomingCallsToolOptions incomingCallsToolOptions = new()
+        IncomingCallsToolOptions toolOptions = new()
         {
             WorkspaceName = options.Name,
             SymbolName = options.SymbolName,
@@ -21,7 +21,10 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             Depth = options.Depth,
         };
 
-        var result = await tool.InvokeAsync(incomingCallsToolOptions);
+        toolOptions.IncludedMembers.UnionWith(options.IncludedMembers);
+        toolOptions.ExcludedMembers.UnionWith(options.ExcludedMembers);
+
+        var result = await tool.InvokeAsync(toolOptions);
 
         return result switch
         {
@@ -63,21 +66,27 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         [Value(0, MetaName = "workspace", Required = true, HelpText = "Path to the solution (.sln[x]) or project (.csproj) to load.")]
         public string Name { get; set; } = "";
 
-        [Value(1, MetaName = "symbol-name", Required = true, HelpText = "Name of the symbol whose members' callers to walk.")]
+        [Value(1, MetaName = "name", Required = true, HelpText = "Name of the symbol whose members' callers to walk.")]
         public string SymbolName { get; set; } = "";
 
-        [Option("symbol-type",
-            HelpText = "Type of the symbol whose members' callers to walk. " + 
-                       "Use to avoid naming conflicts between different constructs with the same name.")]
+        [Option("type", HelpText =
+            "Type of the symbol whose members' callers to walk. " +
+            "Use to avoid naming conflicts between different constructs with the same name.")]
         public IncomingCallsToolSymbolType SymbolType { get; set; }
-        
-        [Option("symbol-namespace",
-            HelpText = "Namespace of the symbol whose members' callers to walk. " + 
-                       "Use to avoid naming conflicts between different constructs with the same name.")]
+
+        [Option("namespace", HelpText =
+            "Namespace of the symbol whose members' callers to walk. " +
+            "Use to avoid naming conflicts between different constructs with the same name.")]
         public string? SymbolNamespace { get; set; }
 
-        // todo member include, exclude, types
+        [Option("include-members", HelpText = "Whitelist of members to walk.")]
+        public IEnumerable<string> IncludedMembers { get; set;  }
         
+        [Option("exclude-members", HelpText = "Whitelist of members to walk.")]
+        public IEnumerable<string> ExcludedMembers { get; set;  }
+
+        // todo member include, exclude, types
+
         [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
         public int Depth { get; set; }
 

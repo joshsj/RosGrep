@@ -163,17 +163,29 @@ public class IncomingCallsTool(
         return null;
     }
 
-    private List<ISymbol>? FindMemberSymbols(IncomingCallsToolOptions options, INamedTypeSymbol symbol)
+    private IEnumerable<ISymbol>? FindMemberSymbols(IncomingCallsToolOptions options, INamedTypeSymbol symbol)
     {
         // todo make configurable
-        var members = symbol.GetMembers()
-            .Where(m => m.Kind is SymbolKind.Method or SymbolKind.Property)
-            .OrderBy(m => m.Name)
-            .ToList();
+        var members = symbol.GetMembers().Where(m => m.Kind is SymbolKind.Method or SymbolKind.Property);
 
-        if (members.Count is 0)
+        if (options.IncludedMembers.Count > 0)
         {
-            logger.LogError("No members found on '{InterfaceName}'", options.SymbolName);
+            members = members.Where(x => options.IncludedMembers.Contains(x.Name));
+        }
+        
+        if (options.ExcludedMembers.Count > 0)
+        {
+            members = members.Where(x => !options.ExcludedMembers.Contains(x.Name));
+        }
+
+        if (!members.Any())
+        {
+            logger.LogError(
+                "No members found on '{InterfaceName}' with filters included='{Included}', excluded='{Excluded}'",
+                options.SymbolName,
+                string.Join(", ", options.IncludedMembers),
+                string.Join(", ", options.ExcludedMembers)
+            );
 
             return null;
         }
