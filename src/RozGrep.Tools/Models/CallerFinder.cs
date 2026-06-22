@@ -60,7 +60,7 @@ internal class CallerFinder
         {
             visited.Add(callingSymbol);
 
-            var node = new CallerNode(callingSymbol.ToDisplayString(Constants.Formatting.TypeAndMemberDisplayFormat));
+            var node = new CallerNode(callingSymbol.ToDisplayString(Formatting.TypeAndMemberDisplayFormat));
 
             node.Definitions.AddRange(
                 callingSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()

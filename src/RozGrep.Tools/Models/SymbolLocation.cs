@@ -11,6 +11,8 @@ public readonly record struct SymbolLocation(string File, int Line, int Characte
         return new SymbolLocation(span.Path, span.StartLinePosition.Line + 1, span.StartLinePosition.Character + 1);
     }
 
+    public override string ToString() => $"{File}({Line},{Character})";
+
     public int CompareTo(SymbolLocation other)
     {
         var fileComparison = string.Compare(File, other.File, StringComparison.Ordinal);

@@ -13,8 +13,10 @@ public class Program {
 		service1.Method();
 		service2.Method();
 
-		// catch the missing save in service 2
-		barRepo.Save();
+		if (barRepo.IsConnected)
+		{
+			barRepo.Save();
+		}
 	}
 }
 

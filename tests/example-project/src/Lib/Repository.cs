@@ -2,6 +2,8 @@ namespace Lib;
 
 public class Repository<T> : IRepository<T> where T : class
 {
+	public bool IsConnected => true;
+
 	public ISet<T> GetAll() => new HashSet<T>();
 
 	public T? GetById(int id) => default;

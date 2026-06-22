@@ -15,14 +15,15 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         IncomingCallsToolOptions toolOptions = new()
         {
             WorkspaceName = options.Name,
-            SymbolName = options.SymbolName,
-            SymbolType = options.SymbolType,
-            SymbolNamespace = options.SymbolNamespace,
+            TargetName = options.TargetName,
+            TargetNamespace = options.TargetNamespace,
+            TargetTypeKind = options.TargetTypeKind,
             Depth = options.Depth,
         };
 
         toolOptions.IncludedMembers.UnionWith(options.IncludedMembers);
         toolOptions.ExcludedMembers.UnionWith(options.ExcludedMembers);
+        toolOptions.MemberSymbolKinds.UnionWith(options.MemberSymbolKinds);
 
         var result = await tool.InvokeAsync(toolOptions);
 
@@ -48,14 +49,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
 
         return AsciiTreeFormatter.Format(roots);
 
-        static string Text(CallableNode c)
-        {
-            var def = c.Definition is { } d
-                ? $" ({d.File}:{d.Line})"
-                : "";
-
-            return c.Signature + def;
-        }
+        static string Text(CallableNode c) => c.Signature + (c.Definition is { } d ? $" @ {d}" : "");
 
         static AsciiTreeNode MapCallerNode(CallerNode c) => new(Text(c), c.Callers.Select(MapCallerNode));
     }
@@ -66,18 +60,18 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         [Value(0, MetaName = "workspace", Required = true, HelpText = "Path to the solution (.sln[x]) or project (.csproj) to load.")]
         public string Name { get; set; } = "";
 
-        [Value(1, MetaName = "name", Required = true, HelpText = "Name of the symbol whose members' callers to walk.")]
-        public string SymbolName { get; set; } = "";
+        [Value(1, MetaName = "name", Required = true, HelpText = "Name of the type whose members' callers to walk.")]
+        public string TargetName { get; set; } = "";
 
-        [Option("type", HelpText =
-            "Type of the symbol whose members' callers to walk. " +
+        [Option("kind", HelpText =
+            "Kind of the type whose members' callers to walk. " +
             "Use to avoid naming conflicts between different constructs with the same name.")]
-        public IncomingCallsToolSymbolType SymbolType { get; set; }
+        public IncomingCallsToolTargetTypeKind? TargetTypeKind { get; set; }
 
         [Option("namespace", HelpText =
-            "Namespace of the symbol whose members' callers to walk. " +
+            "Namespace of the type whose members' callers to walk. " +
             "Use to avoid naming conflicts between different constructs with the same name.")]
-        public string? SymbolNamespace { get; set; }
+        public string? TargetNamespace { get; set; }
 
         [Option("include-members", HelpText = "Set of included of members to walk.")]
         public IEnumerable<string> IncludedMembers { get; set; } = [];
@@ -85,7 +79,8 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         [Option("exclude-members", HelpText = "Set of excluded members to walk.")]
         public IEnumerable<string> ExcludedMembers { get; set; } = [];
 
-        // todo member include, exclude, types
+        [Option("member-kinds", HelpText = "Set of kinds of members to walk.")]
+        public IEnumerable<IncomingCallsToolMemberSymbolKind> MemberSymbolKinds { get; set; } = [];
 
         [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
         public int Depth { get; set; }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
 using RozGrep.Tools.Definitions;
@@ -8,11 +7,33 @@ using RozGrep.Tools.MSBuild;
 
 namespace RozGrep.Tools.IncomingCalls;
 
+using TargetTypeKind = IncomingCallsToolTargetTypeKind;
+using MemberSymbolKind = IncomingCallsToolMemberSymbolKind;
+
 public class IncomingCallsTool(
     ILogger<IncomingCallsTool> logger,
     MSBuildLocatorInitializer msBuildLocatorInitializer
 )
 {
+    private static IReadOnlyDictionary<TargetTypeKind, TypeKind> TargetTypeKindMap { get; } =
+        new Dictionary<TargetTypeKind, TypeKind>
+        {
+            [TargetTypeKind.Interface] = TypeKind.Interface,
+            [TargetTypeKind.Class] = TypeKind.Class,
+            [TargetTypeKind.Struct] = TypeKind.Struct,
+        };
+    
+    private static IReadOnlySet<TypeKind> SupportedTargetTypeKinds { get; } = TargetTypeKindMap.Values.ToHashSet();
+
+    private static IReadOnlyDictionary<MemberSymbolKind, SymbolKind> MemberSymbolKindMap { get; } =
+        new Dictionary<MemberSymbolKind, SymbolKind>
+        {
+            [MemberSymbolKind.Method] = SymbolKind.Method,
+            [MemberSymbolKind.Property] = SymbolKind.Property,
+        };
+
+    private static IReadOnlySet<SymbolKind> SupportedMemberSymbolKinds { get; } = MemberSymbolKindMap.Values.ToHashSet();
+
     public async Task<IncomingCallsResult> InvokeAsync(IncomingCallsToolOptions options)
     {
         msBuildLocatorInitializer.EnsureInitialized();
@@ -25,14 +46,14 @@ public class IncomingCallsTool(
 
         if (targetSymbol is null)
         {
-            return IncomingCallsResult.Fail($"Failed to find type '{options.SymbolName}'");
+            return IncomingCallsResult.Fail($"Failed to find type '{options.TargetName}'");
         }
 
         var memberSymbols = FindMemberSymbols(options, targetSymbol);
 
         if (memberSymbols is null)
         {
-            return IncomingCallsResult.Fail($"No members found on '{options.SymbolName}'");
+            return IncomingCallsResult.Fail($"No members found on '{options.TargetName}'");
         }
 
         var callerFinder = new CallerFinder(solution, options.Depth);
@@ -41,16 +62,16 @@ public class IncomingCallsTool(
         foreach (var memberSymbol in memberSymbols)
         {
             var memberNode = new MemberNode(memberSymbol.ToDisplayString(Constants.Formatting.MemberDisplayFormat));
-        
+
             memberNode.Definitions.AddRange(
                 memberSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()
             );
-            
+
             await foreach (var callerNode in callerFinder.FindCallsAsync(memberSymbol))
             {
                 memberNode.Callers.Add(callerNode);
             }
-            
+
             report.Members.Add(memberNode);
         }
 
@@ -90,7 +111,7 @@ public class IncomingCallsTool(
 
     private async Task<INamedTypeSymbol?> FindTargetSymbol(IncomingCallsToolOptions options, Solution solution)
     {
-        logger.LogDebug("Looking for type '{TypeName}'", options.SymbolName);
+        logger.LogDebug("Looking for type '{TypeName}'", options.TargetName);
 
         foreach (var project in solution.Projects)
         {
@@ -101,25 +122,24 @@ public class IncomingCallsTool(
                 continue;
             }
 
-            var candidates = compilation.GetSymbolsWithName(options.SymbolName, SymbolFilter.Type).OfType<INamedTypeSymbol>();
+            var candidates = compilation.GetSymbolsWithName(options.TargetName, SymbolFilter.Type)
+                .OfType<INamedTypeSymbol>();
 
-            if (options.SymbolType is not IncomingCallsToolSymbolType.Any)
+            if (options.TargetTypeKind is not null)
             {
-                var filteredTypeKind = options.SymbolType switch { 
-                    IncomingCallsToolSymbolType.Interface => TypeKind.Interface,
-                    IncomingCallsToolSymbolType.Class => TypeKind.Class,
-                    IncomingCallsToolSymbolType.Struct => TypeKind.Struct,
-                    _ => throw new UnreachableException()
-                };
-
-                candidates = candidates.Where(x => x.TypeKind == filteredTypeKind);
+                var filtered = TargetTypeKindMap[options.TargetTypeKind.Value];
+                candidates = candidates.Where(x => x.TypeKind == filtered);
+            }
+            else
+            {
+                candidates = candidates.Where(x => SupportedTargetTypeKinds.Contains(x.TypeKind));
             }
 
-            if (!string.IsNullOrWhiteSpace(options.SymbolNamespace))
+            if (!string.IsNullOrWhiteSpace(options.TargetNamespace))
             {
                 // todo not sure if .Name is right
                 // todo do I need to filter by NamespaceKind
-                candidates = candidates.Where(x => x.ContainingNamespace.Name == options.SymbolNamespace);
+                candidates = candidates.Where(x => x.ContainingNamespace.Name == options.TargetNamespace);
             }
 
             var matches = candidates.ToList();
@@ -139,8 +159,8 @@ public class IncomingCallsTool(
                 default:
                 {
                     logger.LogDebug(
-                        "Multiple matching types found in project '{ProjectName}': {MatchingTypes}", 
-                        project.Name, 
+                        "Multiple matching types found in project '{ProjectName}': {MatchingTypes}",
+                        project.Name,
                         string.Join(", ", matches.Select(x => x.ToDisplayString()))
                     );
                     // todo report a better error in the return value
@@ -155,24 +175,34 @@ public class IncomingCallsTool(
 
     private IEnumerable<ISymbol>? FindMemberSymbols(IncomingCallsToolOptions options, INamedTypeSymbol symbol)
     {
-        // todo make configurable
-        var members = symbol.GetMembers().Where(m => m.Kind is SymbolKind.Method or SymbolKind.Property);
+        IEnumerable<ISymbol> members = symbol
+            .GetMembers()
+            // todo hardcoded but seems sensible
+            .Where(x => x is not IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet });
 
         if (options.IncludedMembers.Count > 0)
         {
             members = members.Where(x => options.IncludedMembers.Contains(x.Name));
         }
-        
+
         if (options.ExcludedMembers.Count > 0)
         {
             members = members.Where(x => !options.ExcludedMembers.Contains(x.Name));
+        }
+
+        {
+            var filtered = options.MemberSymbolKinds.Count > 0
+                ? options.MemberSymbolKinds.Select(x => MemberSymbolKindMap[x]).ToHashSet()
+                : SupportedMemberSymbolKinds;
+ 
+            members = members.Where(x => filtered.Contains(x.Kind));
         }
 
         if (!members.Any())
         {
             logger.LogError(
                 "No members found on '{InterfaceName}' with filters included='{Included}', excluded='{Excluded}'",
-                options.SymbolName,
+                options.TargetName,
                 string.Join(", ", options.IncludedMembers),
                 string.Join(", ", options.ExcludedMembers)
             );
