@@ -7,6 +7,9 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>rosgrep</ToolCommandName>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>c#,roslyn</PackageTags>
+        <RepositoryUrl>https://github.com/joshsj/RosGrep</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
     
     <ItemGroup>
