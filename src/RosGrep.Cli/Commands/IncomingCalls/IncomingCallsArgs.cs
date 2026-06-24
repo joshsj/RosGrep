@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using RozGrep.Tools.IncomingCalls;
+using RosGrep.Tools.IncomingCalls;
 using Spectre.Console.Cli;
 
 namespace RosGrep.Cli.Commands.IncomingCalls;

@@ -1,1 +1,0 @@
-﻿global using static RozGrep.Tools.Definitions.Constants;

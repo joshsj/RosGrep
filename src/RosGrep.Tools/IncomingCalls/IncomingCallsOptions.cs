@@ -1,4 +1,4 @@
-﻿namespace RozGrep.Tools.IncomingCalls;
+﻿namespace RosGrep.Tools.IncomingCalls;
 
 public record IncomingCallsToolArgs
 {

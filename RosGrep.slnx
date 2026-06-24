@@ -5,5 +5,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="src/RosGrep.Cli/RosGrep.Cli.csproj" />
-  <Project Path="src/RozGrep.Tools/RozGrep.Tools.csproj" />
+  <Project Path="src/RosGrep.Tools/RosGrep.Tools.csproj" />
 </Solution>

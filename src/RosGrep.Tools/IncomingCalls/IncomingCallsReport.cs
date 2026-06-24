@@ -1,6 +1,6 @@
-﻿using RozGrep.Tools.Models;
+﻿using RosGrep.Tools.Models;
 
-namespace RozGrep.Tools.IncomingCalls;
+namespace RosGrep.Tools.IncomingCalls;
 
 public class IncomingCallsReport(string typeName)
 {

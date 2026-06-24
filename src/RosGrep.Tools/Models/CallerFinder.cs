@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 
-namespace RozGrep.Tools.Models;
+namespace RosGrep.Tools.Models;
 
 internal class CallerFinder
 {

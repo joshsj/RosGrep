@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace RozGrep.Tools.IncomingCalls;
+namespace RosGrep.Tools.IncomingCalls;
 
 public class IncomingCallsResult
 {

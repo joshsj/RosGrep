@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RozGrep.Tools.IncomingCalls;
-using RozGrep.Tools.MSBuild;
+using RosGrep.Tools.IncomingCalls;
+using RosGrep.Tools.MSBuild;
 
-namespace RozGrep.Tools;
+namespace RosGrep.Tools;
 
 public static class Configuration
 {

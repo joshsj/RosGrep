@@ -1,4 +1,4 @@
-﻿namespace RozGrep.Tools.IncomingCalls;
+﻿namespace RosGrep.Tools.IncomingCalls;
 
 // todo plenty for now but there are many more to do
 public enum IncomingCallsToolMemberSymbolKind

@@ -1,4 +1,4 @@
-﻿namespace RozGrep.Tools.IncomingCalls;
+﻿namespace RosGrep.Tools.IncomingCalls;
 
 // todo should also support a property/method/field directly, not just complex types
 public enum IncomingCallsToolTargetTypeKind

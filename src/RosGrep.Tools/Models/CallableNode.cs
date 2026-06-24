@@ -1,4 +1,4 @@
-﻿namespace RozGrep.Tools.Models;
+﻿namespace RosGrep.Tools.Models;
 
 // todo better name?
 public class CallableNode(string signature) : IComparable<CallableNode>

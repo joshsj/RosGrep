@@ -1,4 +1,4 @@
-﻿namespace RozGrep.Tools.Models;
+﻿namespace RosGrep.Tools.Models;
 
 public class MemberNode(string signature) : CallableNode(signature), IComparable<MemberNode>
 {

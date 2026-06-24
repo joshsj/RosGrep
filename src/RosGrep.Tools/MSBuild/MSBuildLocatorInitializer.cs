@@ -1,7 +1,7 @@
 ﻿using Microsoft.Build.Locator;
 using Microsoft.Extensions.Logging;
 
-namespace RozGrep.Tools.MSBuild;
+namespace RosGrep.Tools.MSBuild;
 
 public sealed class MSBuildLocatorInitializer(ILogger<MSBuildLocatorInitializer> logger)
 {

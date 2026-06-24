@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RozGrep.Tools\RozGrep.Tools.csproj" />
+      <ProjectReference Include="..\RosGrep.Tools\RosGrep.Tools.csproj" />
     </ItemGroup>
 
     <ItemGroup>

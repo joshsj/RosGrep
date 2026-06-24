@@ -1,10 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
-using RozGrep.Tools.Models;
-using RozGrep.Tools.MSBuild;
+using RosGrep.Tools.Models;
+using RosGrep.Tools.MSBuild;
 
-namespace RozGrep.Tools.IncomingCalls;
+namespace RosGrep.Tools.IncomingCalls;
 
 using TargetTypeKind = IncomingCallsToolTargetTypeKind;
 using MemberSymbolKind = IncomingCallsToolMemberSymbolKind;

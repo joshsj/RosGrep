@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RosGrep.Cli.Commands;
-using RozGrep.Tools;
+using RosGrep.Tools;
 using RosGrep.Cli.Commands.IncomingCalls;
 using RosGrep.Cli.Spectre;
 using Spectre.Console.Cli;

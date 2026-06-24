@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace RozGrep.Tools.Models;
+namespace RosGrep.Tools.Models;
 
 public readonly record struct SymbolLocation(string File, int Line, int Character) : IComparable<SymbolLocation>
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace RozGrep.Tools.Definitions;
+namespace RosGrep.Tools.Definitions;
 
 internal static class Constants
 {
