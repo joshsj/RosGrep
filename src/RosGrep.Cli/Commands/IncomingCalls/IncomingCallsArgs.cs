@@ -26,15 +26,15 @@ internal sealed class IncomingCallsArgs : CommandSettings
         "Use to avoid naming conflicts between different constructs with the same name.")]
     public string? TargetNamespace { get; set; }
 
-    [CommandOption("--include-members")]
+    [CommandOption("--include-member")]
     [Description("Set of included of members to walk.")]
     public string[] IncludedMembers { get; init; } = [];
 
-    [CommandOption("--exclude-members")]
+    [CommandOption("--exclude-member")]
     [Description("Set of excluded members to walk.")]
     public string[] ExcludedMembers { get; init; } = [];
 
-    [CommandOption("--member-kinds")]
+    [CommandOption("--member-kind")]
     [Description("Set of kinds of members to walk.")]
     public IncomingCallsToolMemberSymbolKind[] MemberSymbolKinds { get; init; } = [];
 
