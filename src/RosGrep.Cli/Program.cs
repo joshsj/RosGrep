@@ -1,51 +1,44 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RozGrep.Tools;
 using RosGrep.Cli.Commands;
-
-using var parser = new Parser(settings =>
-{
-    settings.CaseInsensitiveEnumValues = true; // accept --format json as well as Json
-    settings.HelpWriter = Console.Error; // keep stdout clean for the report
-});
-
-var commandAndOptionTypes = FindCommandAndOptionTypes().ToList();
-
-var parsed = parser.ParseArguments(args, commandAndOptionTypes.Select(x => x.OptionType).ToArray());
-
-if (parsed.Tag == ParserResultType.NotParsed)
-{
-    return 1;
-}
+using RozGrep.Tools;
+using RosGrep.Cli.Commands.IncomingCalls;
+using RosGrep.Cli.Spectre;
+using Spectre.Console.Cli;
 
 var services = new ServiceCollection();
 
+services.AddLogging(x => x.ClearProviders().AddConsole());
+
 services.RegisterRosGrep();
 
-services.AddTransient<CommandExecutor>();
+services.AddTransient(typeof(CommandHandler<,>));
 
-foreach (var (type, _) in commandAndOptionTypes)
+foreach (var type in ScanForCommandTypes())
 {
     services.AddTransient(type);
 }
 
-services.AddLogging(x => x.ClearProviders().AddConsole());
-
 var serviceProvider = services.BuildServiceProvider();
 
-var options = parsed.Value;
-var commandType = options.GetType().DeclaringType!;
-    
-await using var serviceScope = serviceProvider.CreateAsyncScope();
+var app = new CommandApp();
 
-var commandExecutor = serviceScope.ServiceProvider.GetRequiredService<CommandExecutor>();
+app.Configure(config =>
+{
+    config.SetApplicationName("RosGrep");
 
-return await commandExecutor.ExecuteAsync(commandType, options);
+    config.AddCommand<IncomingCallsCommand, IncomingCallsArgs>("incoming-calls", serviceProvider)
+        .WithDescription("Find calls recursively up the call stack.");
+});
 
-IEnumerable<(Type CommandType, Type OptionType)> FindCommandAndOptionTypes() =>
-    Assembly.GetExecutingAssembly()
-        .GetTypes()
-        .Where(x => x.GetCustomAttribute<VerbAttribute>() is not null)
-        .Select(x => (x.DeclaringType!, x));
- 
+return await app.RunAsync(args);
+
+IEnumerable<Type> ScanForCommandTypes()
+{
+    // Blimey
+    static bool IsCommand(Type t) =>
+        t is { IsClass: true, IsAbstract: false } &&
+        t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRosGrepCommand<>));
+
+    return Assembly.GetExecutingAssembly() .GetTypes() .Where(IsCommand); }

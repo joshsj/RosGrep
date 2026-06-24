@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
-using RozGrep.Tools.Definitions;
 using RozGrep.Tools.Models;
 using RozGrep.Tools.MSBuild;
 
@@ -34,15 +33,15 @@ public class IncomingCallsTool(
 
     private static IReadOnlySet<SymbolKind> SupportedMemberSymbolKinds { get; } = MemberSymbolKindMap.Values.ToHashSet();
 
-    public async Task<IncomingCallsResult> InvokeAsync(IncomingCallsToolArgs args)
+    public async Task<IncomingCallsResult> InvokeAsync(IncomingCallsToolArgs args, CancellationToken cancellationToken)
     {
         msBuildLocatorInitializer.EnsureInitialized();
 
         using var workspace = CreateWorkspace();
 
-        var solution = await OpenSolution(args, workspace);
+        var solution = await OpenSolution(args, workspace, cancellationToken);
 
-        var targetSymbol = await FindTargetSymbol(args, solution);
+        var targetSymbol = await FindTargetSymbol(args, solution, cancellationToken);
 
         if (targetSymbol is null)
         {
@@ -61,13 +60,13 @@ public class IncomingCallsTool(
 
         foreach (var memberSymbol in memberSymbols)
         {
-            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Constants.Formatting.MemberDisplayFormat));
+            var memberNode = new MemberNode(memberSymbol.ToDisplayString(Formatting.MemberDisplayFormat));
 
             memberNode.Definitions.AddRange(
                 memberSymbol.Locations.Where(x => x.IsInSource).Select(SymbolLocation.From).Order()
             );
 
-            await foreach (var callerNode in callerFinder.FindCallsAsync(memberSymbol))
+            await foreach (var callerNode in callerFinder.FindCallsAsync(memberSymbol).WithCancellation(cancellationToken))
             {
                 memberNode.Callers.Add(callerNode);
             }
@@ -95,27 +94,28 @@ public class IncomingCallsTool(
         return workspace;
     }
 
-    private async Task<Solution> OpenSolution(IncomingCallsToolArgs args, MSBuildWorkspace workspace)
+    private async Task<Solution> OpenSolution(IncomingCallsToolArgs args, MSBuildWorkspace workspace, CancellationToken cancellationToken)
     {
         logger.LogDebug("Opening solution {SolutionName} ...", args.WorkspaceName);
 
         // todo allow just folder name to be specified? would be nice if we can reuse the logic of dotnet cli to find the "single" target
         var solution = args.WorkspaceName.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
-            ? (await workspace.OpenProjectAsync(args.WorkspaceName)).Solution
-            : (await workspace.OpenSolutionAsync(args.WorkspaceName)).Workspace.CurrentSolution;
+            ? (await workspace.OpenProjectAsync(args.WorkspaceName, cancellationToken: cancellationToken)).Solution
+            : (await workspace.OpenSolutionAsync(args.WorkspaceName, cancellationToken: cancellationToken)).Workspace.CurrentSolution;
 
         logger.LogDebug("Opened solution, {Count} project(s) total", solution.Projects.Count());
 
         return solution;
     }
 
-    private async Task<INamedTypeSymbol?> FindTargetSymbol(IncomingCallsToolArgs args, Solution solution)
+    private async Task<INamedTypeSymbol?> FindTargetSymbol(IncomingCallsToolArgs args, Solution solution,
+        CancellationToken cancellationToken)
     {
         logger.LogDebug("Looking for type '{TypeName}'", args.TargetName);
 
         foreach (var project in solution.Projects)
         {
-            var compilation = await project.GetCompilationAsync();
+            var compilation = await project.GetCompilationAsync(cancellationToken);
 
             if (compilation is null)
             {

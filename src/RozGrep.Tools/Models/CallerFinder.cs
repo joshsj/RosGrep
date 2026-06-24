@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using RozGrep.Tools.Definitions;
 
 namespace RozGrep.Tools.Models;
 

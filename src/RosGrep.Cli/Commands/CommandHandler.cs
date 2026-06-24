@@ -1,19 +1,15 @@
 ﻿using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RosGrep.Cli.Commands.Results;
 
 namespace RosGrep.Cli.Commands;
 
-internal sealed class CommandExecutor(IServiceProvider serviceProvider, ILogger< CommandExecutor> logger)
+internal sealed class CommandHandler<TCommand, TArgs>(TCommand command, ILogger<CommandHandler<TCommand, TArgs>> logger)
+    where TCommand : IRosGrepCommand<TArgs>
 {
-    public async Task<int> ExecuteAsync(Type commandType, object options)
+    public async Task<int> HandleAsync(TArgs args, CancellationToken cancellationToken)
     {
-        await using var serviceScope = serviceProvider.CreateAsyncScope();
-
-        var command = (ICommand)serviceScope.ServiceProvider.GetRequiredService(commandType);
-
-        var result = await command.ExecuteAsync(options);
+        var result = await command.ExecuteAsync(args, cancellationToken);
         
         switch (result) {
             case LogResult logResult:

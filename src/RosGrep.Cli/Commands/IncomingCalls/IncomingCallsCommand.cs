@@ -8,33 +8,34 @@ using RozGrep.Tools.Models;
 
 namespace RosGrep.Cli.Commands.IncomingCalls;
 
-internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingCallsCommand.Options>
+internal class IncomingCallsCommand(IncomingCallsTool tool) : IRosGrepCommand<IncomingCallsArgs>
 {
-    public async Task<ICommandResult> ExecuteAsync(Options options)
+    public async Task<ICommandResult> ExecuteAsync(IncomingCallsArgs args, CancellationToken cancellationToken)
     {
         IncomingCallsToolArgs toolArgs = new()
         {
-            WorkspaceName = options.Name,
-            TargetName = options.TargetName,
-            TargetNamespace = options.TargetNamespace,
-            TargetTypeKind = options.TargetTypeKind,
-            Depth = options.Depth,
+            WorkspaceName = args.Name,
+            TargetName = args.TargetName,
+            TargetNamespace = args.TargetNamespace,
+            TargetTypeKind = args.TargetTypeKind,
+            Depth = args.Depth,
         };
 
-        toolArgs.IncludedMembers.UnionWith(options.IncludedMembers);
-        toolArgs.ExcludedMembers.UnionWith(options.ExcludedMembers);
-        toolArgs.MemberSymbolKinds.UnionWith(options.MemberSymbolKinds);
+        toolArgs.IncludedMembers.UnionWith(args.IncludedMembers);
+        toolArgs.ExcludedMembers.UnionWith(args.ExcludedMembers);
+        toolArgs.MemberSymbolKinds.UnionWith(args.MemberSymbolKinds);
 
-        var result = await tool.InvokeAsync(toolArgs);
+        var result = await tool.InvokeAsync(toolArgs, cancellationToken);
 
         return result switch
         {
             { IsSuccess: true } => new LogResult(
-                options.Format switch
+                args.Format switch
                 {
                     // todo slap dash, do we want to make this re-usable as well
-                    Options.OutputFormat.Tree => ToAsciiTree(result.Report),
-                    Options.OutputFormat.Json => JsonSerializer.Serialize(result.Report, Constants.Formatting.PrettyJsonOptions),
+                    IncomingCallsArgs.OutputFormat.Tree => ToAsciiTree(result.Report),
+                    IncomingCallsArgs.OutputFormat.Json => JsonSerializer.Serialize(result.Report,
+                        Constants.Formatting.PrettyJsonOptions),
                     _ => throw new UnreachableException()
                 }
             ),
@@ -52,46 +53,5 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
         static string Text(CallableNode c) => c.Signature + (c.Definition is { } d ? $" @ {d}" : "");
 
         static AsciiTreeNode MapCallerNode(CallerNode c) => new(Text(c), c.Callers.Select(MapCallerNode));
-    }
-
-    [Verb("incoming-calls", HelpText = "Find calls recursively to a method")]
-    internal sealed class Options
-    {
-        [Value(0, MetaName = "workspace", Required = true, HelpText = "Path to the solution (.sln[x]) or project (.csproj) to load.")]
-        public string Name { get; set; } = "";
-
-        [Value(1, MetaName = "name", Required = true, HelpText = "Name of the type whose members' callers to walk.")]
-        public string TargetName { get; set; } = "";
-
-        [Option("kind", HelpText =
-            "Kind of the type whose members' callers to walk. " +
-            "Use to avoid naming conflicts between different constructs with the same name.")]
-        public IncomingCallsToolTargetTypeKind? TargetTypeKind { get; set; }
-
-        [Option("namespace", HelpText =
-            "Namespace of the type whose members' callers to walk. " +
-            "Use to avoid naming conflicts between different constructs with the same name.")]
-        public string? TargetNamespace { get; set; }
-
-        [Option("include-members", HelpText = "Set of included of members to walk.")]
-        public IEnumerable<string> IncludedMembers { get; set; } = [];
-
-        [Option("exclude-members", HelpText = "Set of excluded members to walk.")]
-        public IEnumerable<string> ExcludedMembers { get; set; } = [];
-
-        [Option("member-kinds", HelpText = "Set of kinds of members to walk.")]
-        public IEnumerable<IncomingCallsToolMemberSymbolKind> MemberSymbolKinds { get; set; } = [];
-
-        [Option("depth", Default = 15, HelpText = "Maximum recursion depth.")]
-        public int Depth { get; set; }
-
-        [Option("format", HelpText = $"Output format, {nameof(OutputFormat.Json)} or {nameof(OutputFormat.Tree)}")]
-        public OutputFormat Format { get; set; }
-
-        public enum OutputFormat
-        {
-            Json,
-            Tree,
-        }
     }
 }
