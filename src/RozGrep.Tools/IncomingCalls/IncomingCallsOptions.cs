@@ -1,6 +1,6 @@
 ﻿namespace RozGrep.Tools.IncomingCalls;
 
-public record IncomingCallsToolOptions
+public record IncomingCallsToolArgs
 {
     public required string WorkspaceName { get; init; }
 

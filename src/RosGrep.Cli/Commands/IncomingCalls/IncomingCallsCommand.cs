@@ -12,7 +12,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
 {
     public async Task<ICommandResult> ExecuteAsync(Options options)
     {
-        IncomingCallsToolOptions toolOptions = new()
+        IncomingCallsToolArgs toolArgs = new()
         {
             WorkspaceName = options.Name,
             TargetName = options.TargetName,
@@ -21,11 +21,11 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
             Depth = options.Depth,
         };
 
-        toolOptions.IncludedMembers.UnionWith(options.IncludedMembers);
-        toolOptions.ExcludedMembers.UnionWith(options.ExcludedMembers);
-        toolOptions.MemberSymbolKinds.UnionWith(options.MemberSymbolKinds);
+        toolArgs.IncludedMembers.UnionWith(options.IncludedMembers);
+        toolArgs.ExcludedMembers.UnionWith(options.ExcludedMembers);
+        toolArgs.MemberSymbolKinds.UnionWith(options.MemberSymbolKinds);
 
-        var result = await tool.InvokeAsync(toolOptions);
+        var result = await tool.InvokeAsync(toolArgs);
 
         return result switch
         {

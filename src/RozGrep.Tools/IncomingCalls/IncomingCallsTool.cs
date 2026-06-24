@@ -34,29 +34,29 @@ public class IncomingCallsTool(
 
     private static IReadOnlySet<SymbolKind> SupportedMemberSymbolKinds { get; } = MemberSymbolKindMap.Values.ToHashSet();
 
-    public async Task<IncomingCallsResult> InvokeAsync(IncomingCallsToolOptions options)
+    public async Task<IncomingCallsResult> InvokeAsync(IncomingCallsToolArgs args)
     {
         msBuildLocatorInitializer.EnsureInitialized();
 
         using var workspace = CreateWorkspace();
 
-        var solution = await OpenSolution(options, workspace);
+        var solution = await OpenSolution(args, workspace);
 
-        var targetSymbol = await FindTargetSymbol(options, solution);
+        var targetSymbol = await FindTargetSymbol(args, solution);
 
         if (targetSymbol is null)
         {
-            return IncomingCallsResult.Fail($"Failed to find type '{options.TargetName}'");
+            return IncomingCallsResult.Fail($"Failed to find type '{args.TargetName}'");
         }
 
-        var memberSymbols = FindMemberSymbols(options, targetSymbol);
+        var memberSymbols = FindMemberSymbols(args, targetSymbol);
 
         if (memberSymbols is null)
         {
-            return IncomingCallsResult.Fail($"No members found on '{options.TargetName}'");
+            return IncomingCallsResult.Fail($"No members found on '{args.TargetName}'");
         }
 
-        var callerFinder = new CallerFinder(solution, options.Depth);
+        var callerFinder = new CallerFinder(solution, args.Depth);
         var report = new IncomingCallsReport(targetSymbol.ToDisplayString());
 
         foreach (var memberSymbol in memberSymbols)
@@ -95,23 +95,23 @@ public class IncomingCallsTool(
         return workspace;
     }
 
-    private async Task<Solution> OpenSolution(IncomingCallsToolOptions options, MSBuildWorkspace workspace)
+    private async Task<Solution> OpenSolution(IncomingCallsToolArgs args, MSBuildWorkspace workspace)
     {
-        logger.LogDebug("Opening solution {SolutionName} ...", options.WorkspaceName);
+        logger.LogDebug("Opening solution {SolutionName} ...", args.WorkspaceName);
 
         // todo allow just folder name to be specified? would be nice if we can reuse the logic of dotnet cli to find the "single" target
-        var solution = options.WorkspaceName.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
-            ? (await workspace.OpenProjectAsync(options.WorkspaceName)).Solution
-            : (await workspace.OpenSolutionAsync(options.WorkspaceName)).Workspace.CurrentSolution;
+        var solution = args.WorkspaceName.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+            ? (await workspace.OpenProjectAsync(args.WorkspaceName)).Solution
+            : (await workspace.OpenSolutionAsync(args.WorkspaceName)).Workspace.CurrentSolution;
 
         logger.LogDebug("Opened solution, {Count} project(s) total", solution.Projects.Count());
 
         return solution;
     }
 
-    private async Task<INamedTypeSymbol?> FindTargetSymbol(IncomingCallsToolOptions options, Solution solution)
+    private async Task<INamedTypeSymbol?> FindTargetSymbol(IncomingCallsToolArgs args, Solution solution)
     {
-        logger.LogDebug("Looking for type '{TypeName}'", options.TargetName);
+        logger.LogDebug("Looking for type '{TypeName}'", args.TargetName);
 
         foreach (var project in solution.Projects)
         {
@@ -122,12 +122,12 @@ public class IncomingCallsTool(
                 continue;
             }
 
-            var candidates = compilation.GetSymbolsWithName(options.TargetName, SymbolFilter.Type)
+            var candidates = compilation.GetSymbolsWithName(args.TargetName, SymbolFilter.Type)
                 .OfType<INamedTypeSymbol>();
 
-            if (options.TargetTypeKind is not null)
+            if (args.TargetTypeKind is not null)
             {
-                var filtered = TargetTypeKindMap[options.TargetTypeKind.Value];
+                var filtered = TargetTypeKindMap[args.TargetTypeKind.Value];
                 candidates = candidates.Where(x => x.TypeKind == filtered);
             }
             else
@@ -135,11 +135,11 @@ public class IncomingCallsTool(
                 candidates = candidates.Where(x => SupportedTargetTypeKinds.Contains(x.TypeKind));
             }
 
-            if (!string.IsNullOrWhiteSpace(options.TargetNamespace))
+            if (!string.IsNullOrWhiteSpace(args.TargetNamespace))
             {
                 // todo not sure if .Name is right
                 // todo do I need to filter by NamespaceKind
-                candidates = candidates.Where(x => x.ContainingNamespace.Name == options.TargetNamespace);
+                candidates = candidates.Where(x => x.ContainingNamespace.Name == args.TargetNamespace);
             }
 
             var matches = candidates.ToList();
@@ -173,26 +173,26 @@ public class IncomingCallsTool(
         return null;
     }
 
-    private IEnumerable<ISymbol>? FindMemberSymbols(IncomingCallsToolOptions options, INamedTypeSymbol symbol)
+    private IEnumerable<ISymbol>? FindMemberSymbols(IncomingCallsToolArgs args, INamedTypeSymbol symbol)
     {
         IEnumerable<ISymbol> members = symbol
             .GetMembers()
             // todo hardcoded but seems sensible
             .Where(x => x is not IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet });
 
-        if (options.IncludedMembers.Count > 0)
+        if (args.IncludedMembers.Count > 0)
         {
-            members = members.Where(x => options.IncludedMembers.Contains(x.Name));
+            members = members.Where(x => args.IncludedMembers.Contains(x.Name));
         }
 
-        if (options.ExcludedMembers.Count > 0)
+        if (args.ExcludedMembers.Count > 0)
         {
-            members = members.Where(x => !options.ExcludedMembers.Contains(x.Name));
+            members = members.Where(x => !args.ExcludedMembers.Contains(x.Name));
         }
 
         {
-            var filtered = options.MemberSymbolKinds.Count > 0
-                ? options.MemberSymbolKinds.Select(x => MemberSymbolKindMap[x]).ToHashSet()
+            var filtered = args.MemberSymbolKinds.Count > 0
+                ? args.MemberSymbolKinds.Select(x => MemberSymbolKindMap[x]).ToHashSet()
                 : SupportedMemberSymbolKinds;
  
             members = members.Where(x => filtered.Contains(x.Kind));
@@ -202,9 +202,9 @@ public class IncomingCallsTool(
         {
             logger.LogError(
                 "No members found on '{InterfaceName}' with filters included='{Included}', excluded='{Excluded}'",
-                options.TargetName,
-                string.Join(", ", options.IncludedMembers),
-                string.Join(", ", options.ExcludedMembers)
+                args.TargetName,
+                string.Join(", ", args.IncludedMembers),
+                string.Join(", ", args.ExcludedMembers)
             );
 
             return null;
