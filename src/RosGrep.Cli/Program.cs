@@ -39,6 +39,6 @@ IEnumerable<Type> ScanForCommandTypes()
     // Blimey
     static bool IsCommand(Type t) =>
         t is { IsClass: true, IsAbstract: false } &&
-        t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRosGrepCommand<>));
+        t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(RosGrep.Cli.Commands.ICommand<>));
 
     return Assembly.GetExecutingAssembly() .GetTypes() .Where(IsCommand); }

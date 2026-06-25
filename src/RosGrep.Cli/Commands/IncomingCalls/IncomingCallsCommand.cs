@@ -8,7 +8,7 @@ using RosGrep.Tools.Models;
 
 namespace RosGrep.Cli.Commands.IncomingCalls;
 
-internal class IncomingCallsCommand(IncomingCallsTool tool) : IRosGrepCommand<IncomingCallsArgs>
+internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingCallsArgs>
 {
     public async Task<ICommandResult> ExecuteAsync(IncomingCallsArgs args, CancellationToken cancellationToken)
     {

@@ -5,7 +5,7 @@ using RosGrep.Cli.Commands.Results;
 namespace RosGrep.Cli.Commands;
 
 internal sealed class CommandHandler<TCommand, TArgs>(TCommand command, ILogger<CommandHandler<TCommand, TArgs>> logger)
-    where TCommand : IRosGrepCommand<TArgs>
+    where TCommand : ICommand<TArgs>
 {
     public async Task<int> HandleAsync(TArgs args, CancellationToken cancellationToken)
     {

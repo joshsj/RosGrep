@@ -17,7 +17,7 @@ internal sealed class SpectreCommandAdapter
     public static Func<CommandContext, TArgs, CancellationToken, Task<int>> CreateDelegate<TCommand, TArgs>(
         IServiceProvider serviceProvider
     )
-        where TCommand : IRosGrepCommand<TArgs>
+        where TCommand : Commands.ICommand<TArgs>
         => new SpectreCommandAdapter(serviceProvider).HandleAsync<TCommand, TArgs>;
 
     private async Task<int> HandleAsync<TCommand, TArgs>(
@@ -25,7 +25,7 @@ internal sealed class SpectreCommandAdapter
         TArgs args,
         CancellationToken cancellationToken
     )
-        where TCommand : IRosGrepCommand<TArgs>
+        where TCommand : Commands.ICommand<TArgs>
     {
         // Use service provider cos Spectre has some weird DI stuff that doesn't support scoped dependencies
         await using var serviceScope = _serviceProvider.CreateAsyncScope();
