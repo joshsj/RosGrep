@@ -2,7 +2,7 @@
 
 public static class ReferenceWorkspace
 {
-    public static string Directory => Path.Join(TestContext.OutputDirectory, "../../../../reference-solution");
+    public static string Directory => Path.Join(TestContext.OutputDirectory, "../../../../reference-workspace");
 
-    public static string Slnx => Path.Join(Directory, "ReferenceSolution.slnx");
+    public static string Slnx => Path.Join(Directory, "ReferenceWorkspace.slnx");
 }
