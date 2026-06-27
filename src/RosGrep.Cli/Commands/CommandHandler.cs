@@ -10,8 +10,9 @@ internal sealed class CommandHandler<TCommand, TArgs>(TCommand command, ILogger<
     public async Task<int> HandleAsync(TArgs args, CancellationToken cancellationToken)
     {
         var result = await command.ExecuteAsync(args, cancellationToken);
-        
-        switch (result) {
+
+        switch (result)
+        {
             case LogResult logResult:
             {
                 // todo or use logger?

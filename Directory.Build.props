@@ -2,9 +2,5 @@
     <PropertyGroup>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <UseArtifactsOutput>true</UseArtifactsOutput>
-        <PackageTags>c#,roslyn</PackageTags>
-        <RepositoryUrl>https://github.com/joshsj/RosGrep</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 </Project>

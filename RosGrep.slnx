@@ -6,4 +6,5 @@
   </Folder>
   <Project Path="src/RosGrep.Cli/RosGrep.Cli.csproj" />
   <Project Path="src/RosGrep.Tools/RosGrep.Tools.csproj" />
+  <Project Path="tests/RosGrep.Tools.Tests/RosGrep.Tools.Tests.csproj" />
 </Solution>

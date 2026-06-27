@@ -34,8 +34,7 @@ internal class IncomingCallsCommand(IncomingCallsTool tool) : ICommand<IncomingC
                 {
                     // todo slap dash, do we want to make this re-usable as well
                     IncomingCallsArgs.OutputFormat.Tree => ToAsciiTree(result.Report),
-                    IncomingCallsArgs.OutputFormat.Json => JsonSerializer.Serialize(result.Report,
-                        Constants.Formatting.PrettyJsonOptions),
+                    IncomingCallsArgs.OutputFormat.Json => JsonSerializer.Serialize(result.Report, Constants.Formatting.PrettyJsonOptions),
                     _ => throw new UnreachableException()
                 }
             ),

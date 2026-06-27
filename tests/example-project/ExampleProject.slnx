@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="src/App/App.csproj" DefaultStartup="true" />
-  <Project Path="src/Lib/Lib.csproj" />
-</Solution>

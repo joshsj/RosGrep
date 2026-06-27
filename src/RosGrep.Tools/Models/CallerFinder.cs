@@ -19,10 +19,9 @@ internal class CallerFinder
 
     // Build the caller nodes for `symbol`, recursing. Merges call sites across the
     // symbol and every interface member it implements (DI dispatch).
-    private async IAsyncEnumerable<CallerNode> FindCallsAsync(ISymbol memberSymbol, int currentDepth,
-        HashSet<ISymbol> visited)
+    private async IAsyncEnumerable<CallerNode> FindCallsAsync(ISymbol memberSymbol, int currentDepth, HashSet<ISymbol> visited)
     {
-        if (currentDepth >= _maxDepth)
+        if (currentDepth >= _maxDepth || visited.Contains(memberSymbol))
         {
             yield break;
         }
@@ -90,7 +89,9 @@ internal class CallerFinder
         {
             yield break;
         }
-
+        
+        // todo make configurable (--include-base-members or something)
+        // todo how does this work for virtual/override
         var memberSymbolsOfImplementedInterfaces =
             from @interface in containingType.AllInterfaces
             from member in @interface.GetMembers()

@@ -1,8 +1,0 @@
-{
-  "solution": {
-    "path": "./ExampleProject.slnx",
-    "projects": [
-      "src/Lib/Lib.csproj"
-    ]
-  }
-}
